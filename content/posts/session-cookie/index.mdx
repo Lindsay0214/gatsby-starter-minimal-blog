@@ -1,0 +1,75 @@
+---
+title: '[速記] Session 與 Cookie'
+date: 2021-07-24
+slug: '/note'
+---
+
+### 小明回來到
+
+[白話 Session 與 Cookie：從經營雜貨店開始](https://hulitw.medium.com/session-and-cookie-15e47ed838bc)
+
+### 深入其中
+
+[淺談 Session 與 Cookie：一起來讀 RFC](https://github.com/aszx87410/blog/issues/45)
+[深入 Session 與 Cookie：Express、PHP 與 Rails 的實作](https://github.com/aszx87410/blog/issues/46)
+[HTTP Session 攻擊與防護](https://devco.re/blog/2014/06/03/http-session-protection/)
+
+---
+
+### 先釐清
+
+**_Session 機制可以只靠網址列實作，可以跟 Cookie 一點關係都沒有
+只是因為靠 Cookie 來實作 Session 機制的話很方便，所以實際應用都會綁一起_**
+​
+
+---
+
+### Session？What？
+
+瀏覽器上 HTTP 是無狀態的，所以當我們發送 Request 時，每一個都是不相關的
+那問題就來了，怎麼讓它記住狀態？**就是靠 session**
+所以 session 就是一個可以讓 http 變得有狀態（stateful）的東東
+而在瀏覽器中，就會透過**網址**來實作這個機制（當然還有其他實作 session 的方法）
+
+```
+Ex. 網購時，把一個鏡子加入購物車，session 就可以透過網址來儲存我們
+   「把一個鏡子加入購物車後的狀態」，可能在原本的網址後面加上 ?item=mirror 之類的來儲存狀態
+```
+
+---
+
+### 瀏覽器中的 Cookie 機制
+
+~~雖然 session 把狀態儲存在網址了，但我們會記得這串網址，下次來的時候給瀏覽器這串網址讓他知道你上次逛到哪嗎？不會~~
+所以只好靠 Server 裡面的 Cookie 機制（Set-cookie）來實作 session
+Server （Set-cookie） -> Browser 儲存
+
+> 或者應該這樣說，Cookie 本來就是為了實作 Session 而生的。藉由標準化的規範，制定了一個專門用來讓瀏覽器與 Server 交換資料的機制，如果用故事來比喻，就好比政府制定說每個人隨身一定要攜帶手機（cookie），然後手機裡面一定要存小明留下來的狀態（session）。
+
+—— 參見[白話 Session 與 Cookie：從經營雜貨店開始](https://hulitw.medium.com/session-and-cookie-15e47ed838bc)
+
+> 在網路世界中，也有很多種方式可以來實作 Session，前面介紹過第一種是網址列，第二種就是靠 Cookie。而 Cookie 就是存在瀏覽器裡的一些資訊。
+
+---
+
+## 歹誌謀呀甘單
+
+### Cookie 可以被竄改、偽造
+
+1. 解法ㄧ —— Cookie-based session
+   就是把 cookie 裡面內容加密
+2. 解法二 —— Session Identifier（Session ID）
+   透過 ID 來認身份，Cookie 只存 ID，狀態都在 Server
+
+---
+
+## 流程跑一遍
+
+### 以瀏覽器運作 session ID 方式舉例
+
+1. 登入完成，Server 設置 SessionId=aaalindsay, user=Lindsay
+2. Server 回傳 Response，要求瀏覽器在 cookie 放 aaalindsay 這個 id
+3. 瀏覽下一個頁面，發送 request 給 Server
+4. 瀏覽器自動帶上 cookie 裡的值 -> aaalindsay
+5. Server 利用帶上的值去查，發現有資料
+6. Server 確認這個人就是 Lindsay

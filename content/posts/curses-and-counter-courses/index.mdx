@@ -1,0 +1,73 @@
+---
+title: '[速記] 瀏覽器運作原理'
+date: 2021-07-23
+slug: '/note'
+---
+
+### 先附上文件
+
+[译 现代浏览器内部揭秘（第一部分）](https://juejin.cn/post/6844903679389073415)
+[Inside look at modern web browser (part 1)  |  Web  |  Google Developers](https://developers.google.com/web/updates/2018/09/inside-browser-part1)
+
+---
+
+### 為了瞭解瀏覽器怎麼運作，首先我們必須先瞭解電腦是怎麼運作的
+
+電腦核心是由 CPU 和 GPU 組成
+
+CPU：電腦的大腦，辦公室的員工，每個人處理各自的任務，我們常聽到的四核心、八核心就是 CPU
+GPU：處理平行運算，針對特定運算加速（繪圖、平行運算），應用於繪圖相關、挖礦
+硬體（CPU、GPU） -> 作業系統 -> 應用程式
+
+---
+
+### 名詞介紹
+
+- Process & Thread
+- Process 程序（中國稱進程）
+- Thread 執行緒（中國稱線程）
+  一個 Process 下有多個 Thread。
+- IPC
+  IPC（Inter Process Communication）指不同 Process 之間溝通
+
+### 一窺瀏覽器的世界
+
+Browser 裡有各種 Process
+（ex. Browser Process、GPU Process、Render Process、Plugin Process）
+
+在 Chrome 裡面每開一個 tab 都是一個 Process (tab 就是瀏覽器上方的分頁)
+
+優點：不互相影響，關掉那個 tab 就好
+缺點：較耗效能
+
+---
+
+### 流程跑起來
+
+/當我們在 Google search input 放入字串時/
+
+UI thread 會判斷這是我們要搜尋的內容還是 URL
+判斷完畢後 UI thread 將結果丟給 Network thread
+Network thread 開始解析 DNS、建立 connection /request/
+OK 後跟 UI thread 說 OK /response/
+UI thread 找到 Renderer process 跟他說可以渲染畫面
+Renderer process 渲染畫面
+/換頁（tab）時/
+
+Browser process 跟 Renderer process 溝通
+Renderer process 裡的 Main thread 就會來做渲染畫面的工作
+Main thread 渲染完畫面會丟一個 page loaded 事件給 Browser process UI thread
+此時 UI thread 就知道網頁處理完可以觸發 onload 事件等等
+
+---
+
+### Renderer process
+
+Renderer process 負責處理 DOM，DOM 是瀏覽器內部對於網頁的一個表示方法、一個資料結構
+
+Renderer process 內有
+
+Main thread
+Worker threads 雜事
+Compositor thread 合成
+Raster thread 光柵
